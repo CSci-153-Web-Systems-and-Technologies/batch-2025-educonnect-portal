@@ -12,7 +12,7 @@ export default function DashboardPage() {
       subtext: "Across all sections", 
       Icon: TrendingUp, 
       buttonText: "View Details",
-      iconClass: "text-indigo-500"
+      iconClass: "text-indigo-500 dark:text-indigo-400"
     },
     { 
       title: "Honor Students", 
@@ -20,7 +20,7 @@ export default function DashboardPage() {
       subtext: "This Quarter", 
       Icon: Award, 
       buttonText: "View Details",
-      iconClass: "text-yellow-500"
+      iconClass: "text-yellow-500 dark:text-yellow-400"
 
     },
     { 
@@ -29,7 +29,7 @@ export default function DashboardPage() {
       subtext: "From Parents", 
       Icon: MessageSquare, 
       buttonText: "Read Messages",
-      iconClass: "text-blue-500"
+      iconClass: "text-blue-500 dark:text-blue-400"
     },
     { 
       title: "Upcoming Events", 
@@ -37,7 +37,7 @@ export default function DashboardPage() {
       subtext: "This Month", 
       Icon: Calendar, 
       buttonText: "View Details",
-      iconClass: "text-red-500"
+      iconClass: "text-red-500 dark:text-red-400"
     }
   ]
     const recognition = [
@@ -46,32 +46,32 @@ export default function DashboardPage() {
       value: 8,
       range: "98% - 100%",
       icon: Trophy,
-      bg: "bg-yellow-100",
-      iconColor: "text-yellow-500"
+      bg: "bg-yellow-100 dark:bg-yellow-900/40",
+      iconColor: "text-yellow-500 dark:text-yellow-400"
     },
     {
       title: "High Honors",
       value: 15,
       range: "95% - 97%",
       icon: Medal,
-      bg: "bg-indigo-200",
-      iconColor: "text-indigo-500"
+      bg: "bg-indigo-200 dark:bg-indigo-900/40",
+      iconColor: "text-indigo-500 dark:text-indigo-400"
     },
     {
       title: "Honors",
       value: 23,
       range: "90% - 94%",
       icon: GraduationCap,
-      bg: "bg-green-200",
-      iconColor: "text-green-600"
+      bg: "bg-green-200 dark:bg-green-900/40",
+      iconColor: "text-green-700 dark:text-green-400"
     },
     {
       title: "Other Students",
       value: 50,
       range: "Below 90%",
       icon: Users,
-      bg: "bg-gray-300",
-      iconColor: "text-gray-500"
+      bg: "bg-gray-300 dark:bg-gray-800",
+      iconColor: "text-gray-700 dark:text-gray-300"
     }
   ]
 
@@ -83,20 +83,23 @@ export default function DashboardPage() {
         {cards.map(({ title, value, subtext, Icon, buttonText, iconClass }, i) => (
           <Card key={i} className="h-57 rounded-3xl shadow-md border border-black">
             <CardHeader className="flex flex-row items-center justify-between px-6">
-              <CardTitle className="text-xl font-bold">{title}</CardTitle>
-              {Icon ? <Icon className={`h-6 w-6 ${iconClass}`} /> : null}
+              <CardTitle className="text-xl font-bold">
+                {title}
+              </CardTitle>
+              {Icon && <Icon className={`h-6 w-6 ${iconClass}`} />}
             </CardHeader>
 
             <CardContent className="px-6 pb-6">
-              <div className="font-bold text-4xl mb-1">{value}</div>
-              {subtext ? <p className="text-xs text-muted-foreground mb-5">{subtext}</p> : null}
-              {buttonText ? (
-                <Button
-                className="border border-gray-300 w-full h-11 rounded-full bg-[#ededed] max-w-full text-black font-normal shadow-sm hover:bg-black transition hover:text-white"
-                  variant="ghost">
-              {buttonText}
+              <div className="font-bold text-4xl mb-1">
+                {value}
+              </div>
+              {subtext && (<p className="text-xs text-muted-foreground mb-5">{subtext}</p>)}
+              {buttonText && (
+                <Button className="border border-border w-full h-11 rounded-full
+                    bg-muted text-foreground shadow-sm hover:bg-foreground hover:text-background transition "variant="ghost">
+                  {buttonText}
                 </Button>
-              ) : null}
+              )}
             </CardContent>
           </Card>
         ))}
@@ -105,7 +108,10 @@ export default function DashboardPage() {
       {/* --- ACADEMIC RECOGNITION SUMMARY --- */}
       <Card className="w-full rounded-3xl border-black px-8 py-6 shadow-md ">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Academic Recognition Summary</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Academic Recognition Summary
+          </CardTitle>
+
           <p className="text-sm text-muted-foreground">
             Students eligible for honor based on current performance
           </p>
@@ -116,15 +122,18 @@ export default function DashboardPage() {
           {recognition.map((item, i) => (
             <div
               key={i}
-              className={`${item.bg} rounded-3xl border border-black shadow-sm border p-6 flex flex-col items-center text-center`}
+              className={`${item.bg} rounded-3xl border border-border shadow-sm p-6 flex flex-col items-center text-center`}
             >
               <item.icon className={`h-10 w-10 mb-2 ${item.iconColor}`} />
-
-              <div className="text-4xl font-bold">{item.value}</div>
-
-              <div className="text-lg font-semibold mt-1">{item.title}</div>
-
-              <p className="text-sm mt-1 text-gray-700">{item.range}</p>
+              <div className="text-4xl font-bold">
+                {item.value}
+              </div>
+              <div className="text-lg font-semibold mt-1">
+                {item.title}
+              </div>
+              <p className="text-sm mt-1 text-muted-foreground">
+                {item.range}
+              </p>
             </div>
           ))}
 

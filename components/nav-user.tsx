@@ -1,14 +1,9 @@
 "use client"
 
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Settings2,
   SettingsIcon,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -86,7 +81,7 @@ export function NavUser({
                 Settings
               </DropdownMenuItem>          
             </DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem variant ="destructive">
               <LogOut />
               Log out
             </DropdownMenuItem>

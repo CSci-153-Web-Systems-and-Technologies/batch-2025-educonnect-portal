@@ -10,7 +10,7 @@ interface StatCardProps {
   icon: LucideIcon;
   iconColor?: string;
   actionLabel?: string;
-  onAction?: () => void;
+  onAction?: () => void; // This is optional (?)
   className?: string;
 }
 
@@ -27,7 +27,7 @@ export function StatCard({
   return (
     <Card 
       className={cn(
-        "flex flex-col justify-between",
+        "flex flex-col justify-between", // This ensures layout is balanced
         "rounded-2xl border-gray-100 dark:border-border",
         "shadow-sm hover:shadow-md transition-shadow duration-200",
         "bg-white dark:bg-card",
@@ -46,17 +46,22 @@ export function StatCard({
         <div className="text-4xl font-bold tracking-tight text-gray-900 dark:text-foreground">
           {value}
         </div>
-        <p className="text-sm text-muted-foreground mt-1 mb-6 font-medium">
+        <p className="text-sm text-muted-foreground mt-1 font-medium">
           {subtitle}
         </p>
         
-        <Button 
-            variant="ghost" 
-            className="w-full rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 dark:bg-muted/50 dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground" 
-            onClick={onAction}
-        >
-          {actionLabel}
-        </Button>
+        {/* Helper function for appearing the view detail button */}
+        {onAction && (
+          <div className="mt-6">
+            <Button 
+                variant="ghost" 
+                className="w-full rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 dark:bg-muted/50 dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground" 
+                onClick={onAction}
+            >
+              {actionLabel}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

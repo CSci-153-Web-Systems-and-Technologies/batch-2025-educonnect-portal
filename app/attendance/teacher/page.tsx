@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card"; // Kept for inline Stats/Table
-import { Button } from "@/components/ui/button"; // Kept for inline Stats/Table
 import { AttendanceFilters } from "@/components/attendance/AttendanceFilters";
+import { AttendanceStats } from "@/components/attendance/AttendanceStats";
 
-// --- TYPES ---
 type Student = {
   id: string;
   name: string;
@@ -15,24 +13,24 @@ type Student = {
 };
 
 export default function TeacherDashboardPage() {
-  // --- STATE ---
   const [selectedClassList, setSelectedClassList] = useState("Grade 7 - A");
   const [selectedStatusList, setSelectedStatusList] = useState("All Students");
   const [date, setDate] = useState<Date | undefined>(new Date());
-  
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // --- MOCK DATA ---
   const [students, setStudents] = useState<Student[]>([
     { id: "1", name: "Ruel Angelo Sinday", email: "21-102429@vsu.edu.ph", grade: "Grade 7 - A", status: "Present" },
-    { id: "2", name: "Maria Clara", email: "21-102430@vsu.edu.ph", grade: "Grade 7 - A", status: "Excused" },
-    { id: "3", name: "Jose Rizal", email: "21-102431@vsu.edu.ph", grade: "Grade 7 - A", status: "Late" },
+    { id: "2", name: "Maria Clara", email: "21-1-02430@vsu.edu.ph", grade: "Grade 7 - A", status: "Excused" },
+    { id: "3", name: "Jose Rizal", email: "21-1-02431@vsu.edu.ph", grade: "Grade 7 - A", status: "Late" },
   ]);
 
   const studentsInGrade = useMemo(() => students.filter((s) => s.grade === selectedClassList), [students, selectedClassList]);
+  
   const counts = useMemo(() => {
     return {
-        total: studentsInGrade.length,
+      present: studentsInGrade.filter((s) => s.status === "Present").length,
+      late: studentsInGrade.filter((s) => s.status === "Late").length,
+      absent: studentsInGrade.filter((s) => s.status === "Absent").length,
+      excused: studentsInGrade.filter((s) => s.status === "Excused").length,
     };
   }, [studentsInGrade]);
 
@@ -45,15 +43,12 @@ export default function TeacherDashboardPage() {
         selectedStatus={selectedStatusList} setSelectedStatus={setSelectedStatusList}
       />
 
-      <Card className="rounded-3xl border border-black dark:border-transparent bg-white dark:bg-neutral-900 p-6 shadow-lg">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold mb-4">Status</h2>
-            <div className="flex gap-4"><span className="border p-2 rounded">Total: {counts.total}</span></div>
-          </div>
-          <Button onClick={() => setIsConfirmOpen(true)}>Send Notifications</Button>
-        </div>
-      </Card>
+      <AttendanceStats 
+        date={date} 
+        selectedClass={selectedClassList} 
+        totalStudents={studentsInGrade.length} 
+        counts={counts}
+      />
 
       <div className="p-4 border rounded-xl">
         Attendance Management

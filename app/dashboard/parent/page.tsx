@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { TrendingUp, UserCheck, MessageSquare, Calendar } from "lucide-react";
+import { TrendingUp, UserCheck, MessageSquare, Calendar, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -52,16 +52,15 @@ export default function ParentDashboard() {
         />
       </div>
 
-      {/* RECENT MESSAGES */}
       <div className="grid gap-6 md:grid-cols-2">
         
+        {/* RECENT MESSAGES */}
         <DashboardSection 
             title="Recent Messages" 
             subtitle="Latest communications from teachers"
             onAction={() => router.push("/messages")}
         >
           <div className="flex flex-col gap-6">
-            {/* Message 1 */}
             <div className="flex items-start gap-4">
                <Avatar className="h-10 w-10">
                   <AvatarImage src="/images/teacher1.jpg" />
@@ -79,7 +78,6 @@ export default function ParentDashboard() {
                </div>
             </div>
 
-            {/* Message 2 */}
             <div className="flex items-start gap-4">
                <Avatar className="h-10 w-10">
                   <AvatarFallback>MZ</AvatarFallback>
@@ -96,7 +94,6 @@ export default function ParentDashboard() {
                </div>
             </div>
 
-             {/* Message 3 */}
              <div className="flex items-start gap-4">
                <Avatar className="h-10 w-10">
                   <AvatarFallback>MD</AvatarFallback>
@@ -113,6 +110,62 @@ export default function ParentDashboard() {
                </div>
             </div>
           </div>
+        </DashboardSection>
+
+        {/* UPCOMING EVENTS */}
+        <DashboardSection 
+            title="Upcoming Events" 
+            subtitle="School calendar and important dates"
+            onAction={() => router.push("/events")}
+        >
+           <div className="flex flex-col gap-6">
+              
+              {/* Event 1 */}
+              <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                      <div className="h-3 w-3 rounded-full bg-blue-500 shadow-sm" />
+                      <div>
+                          <p className="font-semibold text-sm text-gray-900 dark:text-foreground">GPTA Meeting</p>
+                          <p className="text-xs text-muted-foreground">September 20</p>
+                      </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="rounded-full bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground font-normal">Meeting</Badge>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </div>
+              </div>
+
+              {/* Event 2 */}
+              <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                      <div className="h-3 w-3 rounded-full bg-green-500 shadow-sm" />
+                      <div>
+                          <p className="font-semibold text-sm text-gray-900 dark:text-foreground">Science Fair</p>
+                          <p className="text-xs text-muted-foreground">September 25</p>
+                      </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="rounded-full bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground font-normal">Event</Badge>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </div>
+              </div>
+
+              {/* Event 3 */}
+              <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                      <div className="h-3 w-3 rounded-full bg-red-500 shadow-sm" />
+                      <div>
+                          <p className="font-semibold text-sm text-gray-900 dark:text-foreground">Bonifacio Day</p>
+                          <p className="text-xs text-muted-foreground">November 30</p>
+                      </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="rounded-full bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground font-normal">Holiday</Badge>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </div>
+              </div>
+
+           </div>
         </DashboardSection>
 
       </div>

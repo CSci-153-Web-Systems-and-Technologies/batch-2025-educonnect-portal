@@ -5,6 +5,7 @@ import { PieChart, ScrollText, Award, Trophy } from "lucide-react";
 
 // Generic Components
 import { StatCard } from "@/components/dashboard/StatCard";
+import { DashboardSection } from "@/components/dashboard/DashboardSection"; // Added this import
 
 // --- TYPES ---
 type SubjectGrade = {
@@ -37,7 +38,7 @@ export default function ParentGradePage() {
   ];
 
   // --- LOGIC: CENTRALIZED CALCULATIONS ---
-  const { averages, gpa, award } = useMemo(() => {
+  const { rows, averages, gpa, award } = useMemo(() => {
     // 1. Calculate Final Rating per Subject (Row Average)
     const processedRows = grades.map(g => ({
       ...g,
@@ -59,8 +60,13 @@ export default function ParentGradePage() {
     const finalGPA = total.final / count;
 
     return {
+      rows: processedRows, // Needed for the Table
       averages: {
-        q4: total.q4 / count, // We only need Q4 for the stat card right now
+        q1: total.q1 / count,
+        q2: total.q2 / count,
+        q3: total.q3 / count,
+        q4: total.q4 / count,
+        final: finalGPA
       },
       gpa: finalGPA.toFixed(2),
       award: getAwardStatus(finalGPA)
@@ -102,10 +108,52 @@ export default function ParentGradePage() {
         />
       </div>
 
-      {/* Placeholder for Part 2 */}
-      <div className="p-10 border-2 border-dashed border-gray-300 rounded-xl text-center text-gray-400">
-        Grade Table Coming Soon...
-      </div>
+      {/* 2. OVERALL GRADES TABLE (NEW SECTION) */}
+      <DashboardSection 
+          title="Overall Grades" 
+          subtitle="Quarterly academic performance breakdown"
+      >
+          <div className="overflow-x-auto mt-4">
+              <table className="w-full text-left border-collapse">
+                  <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-800">
+                          <th className="py-4 px-4 font-serif text-lg font-medium text-gray-700 dark:text-gray-300 w-1/3">Subjects</th>
+                          <th className="py-4 px-4 font-serif font-medium text-gray-600 dark:text-gray-400 text-center">Q1</th>
+                          <th className="py-4 px-4 font-serif font-medium text-gray-600 dark:text-gray-400 text-center">Q2</th>
+                          <th className="py-4 px-4 font-serif font-medium text-gray-600 dark:text-gray-400 text-center">Q3</th>
+                          <th className="py-4 px-4 font-serif font-medium text-gray-600 dark:text-gray-400 text-center">Q4</th>
+                          <th className="py-4 px-4 font-serif font-medium text-gray-600 dark:text-gray-400 text-right">Final rating</th>
+                      </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {rows.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors">
+                              <td className="py-4 px-4">
+                                  <div className="font-serif text-lg text-gray-900 dark:text-white">{row.subject}</div>
+                                  <div className="font-serif text-xs text-gray-400">{row.teacher}</div>
+                              </td>
+                              <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-300">{row.q1}</td>
+                              <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-300">{row.q2}</td>
+                              <td className="py-4 px-4 text-center text-gray-700 dark:text-gray-300">{row.q3}</td>
+                              <td className="py-4 px-4 text-center text-gray-900 dark:text-white font-bold">{row.q4}</td>
+                              <td className="py-4 px-4 text-right font-medium text-gray-900 dark:text-white">{row.final.toFixed(1)}</td>
+                          </tr>
+                      ))}
+                  </tbody>
+                  {/* Footer: Averages */}
+                  <tfoot>
+                      <tr className="border-t-2 border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-neutral-900/50">
+                          <td className="py-6 px-4 font-serif text-xl font-medium text-gray-900 dark:text-white">General Average</td>
+                          <td className="py-6 px-4 text-center text-gray-500">{averages.q1.toFixed(2)}</td>
+                          <td className="py-6 px-4 text-center text-gray-500">{averages.q2.toFixed(2)}</td>
+                          <td className="py-6 px-4 text-center text-gray-500">{averages.q3.toFixed(2)}</td>
+                          <td className="py-6 px-4 text-center text-gray-900 dark:text-white font-bold">{averages.q4.toFixed(2)}</td>
+                          <td className="py-6 px-4 text-right text-xl font-bold text-gray-900 dark:text-white">{averages.final.toFixed(2)}</td>
+                      </tr>
+                  </tfoot>
+              </table>
+          </div>
+      </DashboardSection>
     </div>
   );
 }

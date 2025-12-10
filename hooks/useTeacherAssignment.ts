@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// FIX: Import the form type from data file
 import { Assignment, INITIAL_ASSIGNMENTS, AssignmentFormData } from "@/data/assignmentData";
 
 export function useTeacherAssignment() {

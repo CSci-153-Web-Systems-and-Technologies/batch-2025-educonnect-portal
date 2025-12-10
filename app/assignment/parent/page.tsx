@@ -23,13 +23,14 @@ export default function ParentAssignmentPage() {
     <div className="flex flex-col gap-8 p-6 lg:p-8 min-h-screen bg-gray-50/50 dark:bg-black text-foreground font-sans">
       
       {/* 1. TOP SECTION: Calendar & Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[450px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[550px]">
+        
         {/* Calendar View */}
         <Card className="col-span-1 p-0 rounded-3xl border-none shadow-sm bg-white dark:bg-neutral-900 flex flex-col overflow-hidden">
           <div className="p-6 border-b border-gray-100 dark:border-neutral-800">
              <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white">Calendar View</h3>
           </div>
-          <div className="flex-1 flex justify-center items-center bg-white dark:bg-neutral-900 p-6">
+          <div className="flex-1 flex  justify-center items-center bg-white dark:bg-neutral-900 p-6">
              <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-xl border border-gray-100 dark:border-neutral-800 p-4 shadow-sm" />
           </div>
         </Card>
@@ -44,7 +45,7 @@ export default function ParentAssignmentPage() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-6 relative z-0">
-             <AssignmentDetailsList assignments={sidePanelList} />
+             <AssignmentDetailsList assignments={sidePanelList} onClick={openView} />
           </div>
         </Card>
       </div>
@@ -62,7 +63,7 @@ export default function ParentAssignmentPage() {
           <table className="w-full text-left text-sm min-w-[800px]">
             <thead>
               <tr className="text-gray-400 border-b border-dashed border-gray-200 dark:border-neutral-800">
-                {/* UPDATED: Removed "Status" from headers */}
+                {/* UPDATED: Removed "Status" & "Actions" from headers */}
                 {["Subject Name", "Type", "Date & Time Start", "Date & Time End", "Created By"].map(h => (
                     <th key={h} className={`pb-4 font-medium uppercase text-xs tracking-wider text-gray-500 ${h === 'Subject Name' ? 'pl-4' : ''}`}>{h}</th>
                 ))}

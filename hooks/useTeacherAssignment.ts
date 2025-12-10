@@ -7,7 +7,15 @@ export function useTeacherAssignment() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [assignments, setAssignments] = useState<Assignment[]>(INITIAL_ASSIGNMENTS);
 
-  const [modals, setModals] = useState({ create: false, view: false, delete: false });
+  // Added 'publish' and 'unpublish' to state
+  const [modals, setModals] = useState({ 
+    create: false, 
+    view: false, 
+    delete: false, 
+    publish: false, 
+    unpublish: false 
+  });
+  
   const [selectedItem, setSelectedItem] = useState<Assignment | null>(null);
 
   const toggleModal = (modal: keyof typeof modals, isOpen: boolean) => setModals(prev => ({ ...prev, [modal]: isOpen }));
@@ -31,6 +39,10 @@ export function useTeacherAssignment() {
 
   const handleToggleStatus = (item: Assignment, newStatus: "Draft" | "Published") => {
     setAssignments(prev => prev.map(a => a.id === item.id ? { ...a, status: newStatus } : a));
+    // Close the modals after toggling
+    if (newStatus === "Published") toggleModal("publish", false);
+    else toggleModal("unpublish", false);
+    setSelectedItem(null);
   };
 
   // Filter for Calendar Details Panel
@@ -39,7 +51,7 @@ export function useTeacherAssignment() {
     const check = new Date(date); check.setHours(0,0,0,0);
     const start = new Date(a.startDate); start.setHours(0,0,0,0);
     const due = new Date(a.dueDate); due.setHours(0,0,0,0);
-    return check >= start && check <= due;
+    return (check >= start && check <= due) && a.status === "Published";
   });
 
   return {

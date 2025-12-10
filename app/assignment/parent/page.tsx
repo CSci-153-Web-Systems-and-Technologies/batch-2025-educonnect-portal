@@ -29,7 +29,7 @@ export default function AssignmentParentPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50 dark:bg-black p-6 gap-6 overflow-y-auto">
+    <div className="flex h-full flex-col bg-gray-50 dark:bg-black p-6 gap-6 overflow-hidden">
       
       {/* --- TOP ROW: CALENDAR & DETAILS --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 shrink-0">
@@ -66,14 +66,14 @@ export default function AssignmentParentPage() {
       </div>
 
       {/* --- BOTTOM ROW: MAIN TABLE --- */}
-      <Card className="flex-1 flex flex-col p-6 rounded-3xl border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm min-h-[400px]">
+      <Card className="flex-1 flex flex-col p-6 rounded-3xl border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
         
-        <div className="mb-6">
+        <div className="mb-6 shrink-0">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-serif">View Assignments & Activities</h1>
           <p className="text-gray-500 mt-1">View upcoming tasks and deadlines.</p>
         </div>
 
-        <div className="flex-1 overflow-x-auto">
+        <div className="flex-1 overflow-auto">
           {assignments.length === 0 ? (
              <div className="flex h-full items-center justify-center text-gray-400">
                 No active assignments found.

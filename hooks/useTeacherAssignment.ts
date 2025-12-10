@@ -30,26 +30,17 @@ export function useTeacherAssignment() {
     try {
       setLoading(true);
       
-      // CRITICAL: Use the correct API route for fetching assignments
-      const response = await fetch('/api/assignments'); 
-      
-      if (!response.ok) {
-        // Throw an error if the HTTP status is not 200-299
-        // This triggers the catch block and shows the devtools error (line 30 fix)
-        throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      // Use assignmentService directly instead of API route
+      const data = await assignmentService.getAll();
       
       if (Array.isArray(data)) {
         setAssignments(data);
       } else {
-        console.warn("API returned non-array data:", data);
+        console.warn("Service returned non-array data:", data);
         setAssignments([]);
       }
 
     } catch (error) {
-      // Line 30: The specific place the next-devtools error intercepts.
       console.error("Error loading assignments:", error); 
     } finally {
       setLoading(false);

@@ -58,23 +58,30 @@ export function SignupForm({
       return;
     }
 
-    // 2. Insert corresponding record into the 'teachers' or 'parents' table
+    // 2. Create profile via server-side API route (uses service role key to bypass RLS)
     if (authData.user) {
-        let dbTable = role === 'teacher' ? 'teachers' : 'parents';
-        let dbPayload = role === 'teacher' 
-            ? { id: authData.user.id, full_name: fullName }
-            : { id: authData.user.id, phone_number: null }; // Parents don't require phone number at signup
+        try {
+          const res = await fetch('/api/auth/create-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: authData.user.id,
+              role,
+              fullName
+            })
+          })
 
-        const { error: dbError } = await supabase
-            .from(dbTable)
-            .insert(dbPayload);
-
-        if (dbError) {
-             setMessage(`Signup successful, but failed to link profile (${dbTable}): ${dbError.message}`);
-        } else {
-             setMessage('Success! Check your email to confirm your account and complete registration.');
+          if (!res.ok) {
+            const err = await res.json()
+            setMessage(`Signup successful, but failed to link profile: ${err.error}`)
+          } else {
+            setMessage('Success! Check your email to confirm your account and complete registration.')
+            setIsSuccess(true)
+          }
+        } catch (err: any) {
+          setMessage(`Signup successful, but profile creation failed: ${err.message}`)
+          setIsSuccess(true) // Auth succeeded, profile may be created manually later
         }
-        setIsSuccess(true);
     }
     
     setLoading(false);

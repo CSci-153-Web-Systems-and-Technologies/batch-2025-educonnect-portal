@@ -5,23 +5,29 @@ export const assignmentService = {
   async getAll() {
     const { data, error } = await supabase
       .from('assignments')
-      .select('*, startDate:start_date, dueDate:due_date, creator:created_by') 
+      .select('*, startDate:start_date, dueDate:due_date, creator:created_by, teachers(full_name)') 
       .order('created_at', { ascending: false });
       
     if (error) throw error;
-    return data;
+    return data?.map((item: any) => ({
+      ...item,
+      creatorName: item.teachers?.full_name || 'Unknown'
+    }));
   },
 
   // 2. GET PUBLISHED ONLY (For Parents - sees only Published)
   async getPublished() {
     const { data, error } = await supabase
       .from('assignments')
-      .select('*, startDate:start_date, dueDate:due_date, creator:created_by')
-      .eq('status', 'Published') // <--- The Magic Filter
+      .select('*, startDate:start_date, dueDate:due_date, creator:created_by, teachers(full_name)')
+      .eq('status', 'Published')
       .order('start_date', { ascending: true });
 
     if (error) throw error;
-    return data;
+    return data?.map((item: any) => ({
+      ...item,
+      creatorName: item.teachers?.full_name || 'Unknown'
+    }));
   },
 
   async create(data: AssignmentFormData) {
@@ -38,8 +44,9 @@ export const assignmentService = {
     }
 
     const payload: any = {
-      subject: data.subject,
+      title: data.title,
       type: data.type,
+      subject: data.subject,
       description: data.description,
       start_date: data.startDate,
       due_date: data.dueDate,
@@ -60,7 +67,14 @@ export const assignmentService = {
     const dbUpdates: any = { ...updates };
     if (updates.startDate) dbUpdates.start_date = updates.startDate;
     if (updates.dueDate) dbUpdates.due_date = updates.dueDate;
-    delete dbUpdates.startDate; delete dbUpdates.dueDate;
+    delete dbUpdates.startDate;
+    delete dbUpdates.dueDate;
+    delete dbUpdates.creator;
+    delete (dbUpdates as any).creatorName;
+    delete (dbUpdates as any).teachers;
+    delete dbUpdates.id;
+    delete dbUpdates.status;
+    delete (dbUpdates as any).created_at;
     const { error } = await supabase.from('assignments').update(dbUpdates).eq('id', id);
     if (error) throw error;
   },

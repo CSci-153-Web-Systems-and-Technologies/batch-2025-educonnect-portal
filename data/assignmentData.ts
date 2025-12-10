@@ -1,5 +1,6 @@
 export type Assignment = {
   id: string;
+  title: string;
   subject: string;
   type: "Assignment" | "Activity" | "Group Project" | "Quiz";
   startDate: string;

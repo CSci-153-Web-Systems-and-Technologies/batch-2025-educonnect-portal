@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
 import { AssignmentFormData } from "@/data/assignmentData";
-
 export const assignmentService = {
   // 1. GET ALL (For Teachers - sees Drafts & Published)
   async getAll() {
@@ -25,14 +24,34 @@ export const assignmentService = {
     return data;
   },
 
-  // ... (Keep existing create, update, delete, toggleStatus methods exactly as they were)
   async create(data: AssignmentFormData) {
+    // RLS-safe: require an authenticated user and set created_by = auth.uid()
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("Auth session error:", sessionError);
+      throw new Error("You must be signed in to create assignments (auth session missing).");
+    }
+
+    const userId = sessionData?.session?.user?.id;
+    if (!userId) {
+      throw new Error("You must be signed in to create assignments (no user in session).");
+    }
+
+    const payload: any = {
+      subject: data.subject,
+      type: data.type,
+      description: data.description,
+      start_date: data.startDate,
+      due_date: data.dueDate,
+      status: "Draft",
+      created_by: userId,
+    };
+
     const { data: result, error } = await supabase
       .from('assignments')
-      .insert([{
-        subject: data.subject, type: data.type, description: data.description,
-        start_date: data.startDate, due_date: data.dueDate, status: "Draft", created_by: "Teacher"
-      }]).select().single();
+      .insert([payload])
+      .select()
+      .single();
     if (error) throw error;
     return result;
   },

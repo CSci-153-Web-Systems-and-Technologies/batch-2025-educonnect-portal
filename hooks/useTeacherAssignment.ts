@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { assignmentService } from "@/services/assignmentService";
+// Assuming assignmentService is correctly defined to handle Supabase interaction
+import { assignmentService } from "@/services/assignmentService"; 
+// Assuming Assignment and AssignmentFormData types are correct
 import { Assignment, AssignmentFormData } from "@/data/assignmentData"; 
 
 export function useTeacherAssignment() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  
   const [modals, setModals] = useState({ 
     create: false, 
     view: false, 
@@ -15,19 +18,39 @@ export function useTeacherAssignment() {
     publish: false, 
     unpublish: false 
   });
+  
   const [selectedItem, setSelectedItem] = useState<Assignment | null>(null);
 
+  // Initial data fetch
   useEffect(() => {
     fetchAssignments();
   }, []);
 
   const fetchAssignments = async () => {
-    setLoading(true);
     try {
-      const data = await assignmentService.getAll();
-      setAssignments(data as any); 
+      setLoading(true);
+      
+      // CRITICAL: Use the correct API route for fetching assignments
+      const response = await fetch('/api/assignments'); 
+      
+      if (!response.ok) {
+        // Throw an error if the HTTP status is not 200-299
+        // This triggers the catch block and shows the devtools error (line 30 fix)
+        throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (Array.isArray(data)) {
+        setAssignments(data);
+      } else {
+        console.warn("API returned non-array data:", data);
+        setAssignments([]);
+      }
+
     } catch (error) {
-      console.error("Failed to load assignments", error);
+      // Line 30: The specific place the next-devtools error intercepts.
+      console.error("Error loading assignments:", error); 
     } finally {
       setLoading(false);
     }
@@ -42,6 +65,7 @@ export function useTeacherAssignment() {
     const start = new Date(a.startDate); start.setHours(0,0,0,0);
     const due = new Date(a.dueDate); due.setHours(0,0,0,0);
     
+    // Check if the current selected date falls within the assignment start and due dates
     return (check >= start && check <= due);
   });
 
@@ -53,14 +77,25 @@ export function useTeacherAssignment() {
   const actions = {
     handleSave: async (data: AssignmentFormData) => {
       try {
+        console.log("Submitting assignment data:", data); // Helpful for debugging the payload
+
         if (selectedItem) {
           await assignmentService.update(selectedItem.id, data);
         } else {
+          // This saves the new assignment to the database
           await assignmentService.create(data); 
         }
+        
+        // Refresh the list and close the modal upon success
         await fetchAssignments(); 
         toggleModal("create", false);
-      } catch (e) { alert("Error saving assignment"); }
+        
+      } catch (e: any) { 
+        // This ensures the actual database/network error message is shown
+        console.error("FULL SAVE ERROR:", e);
+        const errorMessage = e.message || e.toString() || "Unknown error";
+        alert(`Error saving assignment: ${errorMessage}. Check console for details.`);
+      }
     },
 
     handleDelete: async () => {
@@ -69,17 +104,23 @@ export function useTeacherAssignment() {
         await assignmentService.delete(selectedItem.id);
         await fetchAssignments();
         toggleModal("delete", false);
-      } catch (e) { alert("Error deleting assignment"); }
+      } catch (e: any) { 
+        console.error("DELETE ERROR:", e);
+        alert(`Error deleting assignment: ${e.message || "Unknown error"}`); 
+      }
     },
 
-    // This handles the actual flipping of the status
+    // Handles the actual flipping of the status (Draft <-> Published)
     handleToggleStatus: async () => {
       if (!selectedItem) return;
       try {
         await assignmentService.toggleStatus(selectedItem.id, selectedItem.status);
         await fetchAssignments();
         toggleModal(selectedItem.status === "Draft" ? "publish" : "unpublish", false);
-      } catch (e) { alert("Error updating status"); }
+      } catch (e: any) { 
+        console.error("STATUS TOGGLE ERROR:", e);
+        alert(`Error updating status: ${e.message || "Unknown error"}`); 
+      }
     }
   };
 
@@ -87,7 +128,7 @@ export function useTeacherAssignment() {
     assignments,
     sidePanelList, 
     date,          
-    setDate,      
+    setDate,       
     loading,
     modals,
     toggleModal,

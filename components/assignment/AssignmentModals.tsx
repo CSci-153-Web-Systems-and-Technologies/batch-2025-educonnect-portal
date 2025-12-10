@@ -48,14 +48,13 @@ function DateTimePicker({ label, date, setDate }: { label: string, date: Date | 
           </PopoverContent>
         </Popover>
         <div className="w-32 relative">
-            <Input type="time" step="60" className="bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-700 h-12 rounded-xl appearance-none [&::-webkit-calendar-picker-indicator]:hidden pl-3 pr-8" value={date ? format(date, "HH:mm") : "09:00"} onChange={handleTimeChange}/>
+            <Input type="time" step="60" className="bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-700 h-12 rounded-xl appearance-none [&::-webkit-calendar-picker-indicator]:hidden pl-3 pr-8" value={date ? format(date, "HH:mm") : "07:00"} onChange={handleTimeChange}/>
         </div>
       </div>
     </div>
   );
 }
 
-// ... [Keep CreateAssignmentModal as is] ...
 export function CreateAssignmentModal({ isOpen, onClose, onSave, initialData }: any) {
   const [formData, setFormData] = useState<AssignmentFormData>({ subject: "", type: "Assignment", startDate: "", dueDate: "", description: "" });
   const [start, setStart] = useState<Date | undefined>();
@@ -92,7 +91,7 @@ export function CreateAssignmentModal({ isOpen, onClose, onSave, initialData }: 
         </div>
         <div className="space-y-6">
           <div className="space-y-2"><Label className="text-gray-300 font-medium">Assignment Title</Label><Input className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 focus:ring-2 focus:ring-blue-500" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} /></div>
-          <div className="space-y-2"><Label className="text-gray-300 font-medium">Type</Label><Select value={formData.type} onValueChange={(val: any) => setFormData({...formData, type: val})}><SelectTrigger className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800"><SelectValue placeholder="Select Type" /></SelectTrigger><SelectContent>{["Assignment", "Activity", "Group Project", "Quiz"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label className="text-gray-300 font-medium">Type</Label><Select value={formData.type} onValueChange={(val: any) => setFormData({...formData, type: val})}><SelectTrigger className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800"><SelectValue placeholder="Select Type" /></SelectTrigger><SelectContent>{["Assignment", "Activity", "Exam", "Report", "Oral Recitation", "Need to Study", "Project", "Quiz"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><DateTimePicker label="Start Date & Time" date={start} setDate={setStart} /><DateTimePicker label="Due Date & Time" date={due} setDate={setDue} /></div>
           <div className="space-y-2"><Label className="text-gray-300 font-medium">Description</Label><Textarea className="rounded-xl min-h-[120px] bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 resize-none p-4" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
         </div>
@@ -102,7 +101,6 @@ export function CreateAssignmentModal({ isOpen, onClose, onSave, initialData }: 
   );
 }
 
-// ... [Keep ViewAssignmentModal as is] ...
 export function ViewAssignmentModal({ isOpen, onClose, data }: any) {
     if (!isOpen || !data) return null;
     return (
@@ -129,7 +127,6 @@ export function ViewAssignmentModal({ isOpen, onClose, data }: any) {
     );
 }
 
-// ... [Keep DeleteAssignmentModal as is] ...
 export function DeleteAssignmentModal({ isOpen, onClose, onConfirm, title }: any) {
     if (!isOpen) return null;
     return (
@@ -147,7 +144,7 @@ export function DeleteAssignmentModal({ isOpen, onClose, onConfirm, title }: any
     );
 }
 
-// --- 4. PUBLISH ASSIGNMENT MODAL ---
+// PUBLISH ASSIGNMENT MODAL
 interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -185,7 +182,7 @@ export function PublishAssignmentModal({ isOpen, onClose, onConfirm, title }: Pu
   );
 }
 
-// --- 5. UNPUBLISH ASSIGNMENT MODAL ---
+// UNPUBLISH ASSIGNMENT MODAL
 interface UnpublishModalProps {
   isOpen: boolean;
   onClose: () => void;

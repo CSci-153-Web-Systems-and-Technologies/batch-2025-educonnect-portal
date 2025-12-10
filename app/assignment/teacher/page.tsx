@@ -70,8 +70,8 @@ export default function AssignmentTeacherPage() {
         
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-serif">Assignments & Activities</h1>
-            <p className="text-gray-500 mt-1">View upcoming tasks and deadlines.</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-serif">Assignments & Activities Management</h1>
+            <p className="text-gray-500 mt-1">Set upcoming tasks and deadlines.</p>
           </div>
           <Button onClick={() => toggleModal("create", true)} className="rounded-xl bg-black dark:bg-white text-white dark:text-black hover:opacity-90">
             <Plus className="mr-2 h-4 w-4" /> Create New

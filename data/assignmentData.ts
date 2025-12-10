@@ -2,14 +2,13 @@ export type Assignment = {
   id: string;
   subject: string;
   type: "Assignment" | "Activity" | "Group Project" | "Quiz";
-  startDate: string; // ISO String
-  dueDate: string;   // ISO String
+  startDate: string;
+  dueDate: string;
   status: "Draft" | "Published";
   creator: string;
   description: string;
 };
 
-// EXPORTED HERE TO PREVENT CIRCULAR DEPENDENCY
 export type AssignmentFormData = Omit<Assignment, "id" | "status" | "creator">;
 
 export const INITIAL_ASSIGNMENTS: Assignment[] = [

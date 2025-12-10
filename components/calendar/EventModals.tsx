@@ -9,10 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 import { DateRange } from "react-day-picker";
 
-// --- Types (Exported) ---
 export type EventFormData = {
   id?: string;
   title: string;
@@ -25,7 +24,6 @@ export type EventFormData = {
   description: string;
 };
 
-// Create/edit event modal
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -252,7 +250,6 @@ export function CreateEventModal({ isOpen, onClose, onSave, initialData }: Creat
   );
 }
 
-// Delete Event Modal
 interface DeleteModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -287,7 +284,6 @@ export function DeleteEventModal({ isOpen, onClose, onConfirm, eventTitle }: Del
     );
   }
 
-// Publish Event Modal
 interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -326,7 +322,6 @@ export function PublishEventModal({ isOpen, onClose, onConfirm, eventTitle }: Pu
   );
 }
 
-// Unpublish evennt modal
 interface UnpublishModalProps {
   isOpen: boolean;
   onClose: () => void;

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Assignment, INITIAL_ASSIGNMENTS, AssignmentFormData } from "@/data/assignmentData";
+import { useState, useEffect } from "react";
+import { assignmentService } from "@/services/assignmentService";
+import { Assignment, AssignmentFormData } from "@/data/assignmentData"; 
 
 export function useTeacherAssignment() {
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [assignments, setAssignments] = useState<Assignment[]>(INITIAL_ASSIGNMENTS);
-
-  // Added 'publish' and 'unpublish' to state
   const [modals, setModals] = useState({ 
     create: false, 
     view: false, 
@@ -15,50 +15,84 @@ export function useTeacherAssignment() {
     publish: false, 
     unpublish: false 
   });
-  
   const [selectedItem, setSelectedItem] = useState<Assignment | null>(null);
 
-  const toggleModal = (modal: keyof typeof modals, isOpen: boolean) => setModals(prev => ({ ...prev, [modal]: isOpen }));
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
 
-  // --- Handlers ---
-  const handleSave = (data: AssignmentFormData) => {
-    if (selectedItem) {
-        setAssignments(prev => prev.map(a => a.id === selectedItem.id ? { ...a, ...data } : a));
-    } else {
-        setAssignments(prev => [...prev, { ...data, id: Math.random().toString(), creator: "You", status: "Draft" }]);
+  const fetchAssignments = async () => {
+    setLoading(true);
+    try {
+      const data = await assignmentService.getAll();
+      setAssignments(data as any); 
+    } catch (error) {
+      console.error("Failed to load assignments", error);
+    } finally {
+      setLoading(false);
     }
-    toggleModal("create", false);
-    setSelectedItem(null);
   };
 
-  const handleDelete = () => {
-    if (selectedItem) setAssignments(prev => prev.filter(a => a.id !== selectedItem.id));
-    toggleModal("delete", false);
-    setSelectedItem(null);
-  };
-
-  const handleToggleStatus = (item: Assignment, newStatus: "Draft" | "Published") => {
-    setAssignments(prev => prev.map(a => a.id === item.id ? { ...a, status: newStatus } : a));
-    // Close the modals after toggling
-    if (newStatus === "Published") toggleModal("publish", false);
-    else toggleModal("unpublish", false);
-    setSelectedItem(null);
-  };
-
-  // Filter for Calendar Details Panel
   const sidePanelList = assignments.filter(a => {
+    // A. Must be Published to appear in calendar details
+    if (a.status !== "Published") return false;
+
     if (!date) return false;
     const check = new Date(date); check.setHours(0,0,0,0);
     const start = new Date(a.startDate); start.setHours(0,0,0,0);
     const due = new Date(a.dueDate); due.setHours(0,0,0,0);
-    return (check >= start && check <= due) && a.status === "Published";
+    
+    return (check >= start && check <= due);
   });
 
+  const toggleModal = (modal: keyof typeof modals, isOpen: boolean) => {
+    setModals(prev => ({ ...prev, [modal]: isOpen }));
+    if (!isOpen) setSelectedItem(null);
+  };
+
+  const actions = {
+    handleSave: async (data: AssignmentFormData) => {
+      try {
+        if (selectedItem) {
+          await assignmentService.update(selectedItem.id, data);
+        } else {
+          await assignmentService.create(data); 
+        }
+        await fetchAssignments(); 
+        toggleModal("create", false);
+      } catch (e) { alert("Error saving assignment"); }
+    },
+
+    handleDelete: async () => {
+      if (!selectedItem) return;
+      try {
+        await assignmentService.delete(selectedItem.id);
+        await fetchAssignments();
+        toggleModal("delete", false);
+      } catch (e) { alert("Error deleting assignment"); }
+    },
+
+    // This handles the actual flipping of the status
+    handleToggleStatus: async () => {
+      if (!selectedItem) return;
+      try {
+        await assignmentService.toggleStatus(selectedItem.id, selectedItem.status);
+        await fetchAssignments();
+        toggleModal(selectedItem.status === "Draft" ? "publish" : "unpublish", false);
+      } catch (e) { alert("Error updating status"); }
+    }
+  };
+
   return {
-    date, setDate,
-    assignments, sidePanelList,
-    modals, toggleModal,
-    selectedItem, setSelectedItem,
-    actions: { handleSave, handleDelete, handleToggleStatus }
+    assignments,
+    sidePanelList, 
+    date,          
+    setDate,      
+    loading,
+    modals,
+    toggleModal,
+    selectedItem,
+    setSelectedItem,
+    actions
   };
 }

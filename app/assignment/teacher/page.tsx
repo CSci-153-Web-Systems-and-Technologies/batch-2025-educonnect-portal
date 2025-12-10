@@ -1,95 +1,129 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { useTeacherAssignment } from "@/hooks/useTeacherAssignment";
 import { AssignmentRow, AssignmentDetailsList } from "@/components/assignment/AssignmentComponents";
-import { 
-  CreateAssignmentModal, 
-  ViewAssignmentModal, 
-  DeleteAssignmentModal, 
-  PublishAssignmentModal, 
-  UnpublishAssignmentModal 
-} from "@/components/assignment/AssignmentModals";
+import { CreateAssignmentModal, ViewAssignmentModal } from "@/components/assignment/AssignmentModals";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal"; 
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar"; 
+import { Card } from "@/components/ui/card";
+import { Plus, Loader2 } from "lucide-react";
 
-export default function TeacherAssignmentPage() {
+export default function AssignmentTeacherPage() {
   const { 
-    date, setDate, assignments, sidePanelList, 
-    modals, toggleModal, selectedItem, setSelectedItem, actions 
+    assignments, 
+    sidePanelList, 
+    date, 
+    setDate, 
+    loading, 
+    modals, 
+    toggleModal, 
+    selectedItem, 
+    setSelectedItem, 
+    actions 
   } = useTeacherAssignment();
 
-  // Handlers
-  const openCreate = () => { setSelectedItem(null); toggleModal("create", true); };
-  const openEdit = (e: any, item: any) => { e.stopPropagation(); setSelectedItem(item); toggleModal("create", true); };
-  const openView = (item: any) => { setSelectedItem(item); toggleModal("view", true); };
-  const openDelete = (e: any, item: any) => { e.stopPropagation(); setSelectedItem(item); toggleModal("delete", true); };
-  
-  // OPEN MODALS instead of instant action
-  const openPublish = (e: any, item: any) => { e.stopPropagation(); setSelectedItem(item); toggleModal("publish", true); };
-  const openUnpublish = (e: any, item: any) => { e.stopPropagation(); setSelectedItem(item); toggleModal("unpublish", true); };
-
-  // CONFIRMATION ACTIONS
-  const confirmPublish = () => { if (selectedItem) actions.handleToggleStatus(selectedItem, "Published"); };
-  const confirmUnpublish = () => { if (selectedItem) actions.handleToggleStatus(selectedItem, "Draft"); };
+  if (loading && assignments.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-8 p-6 lg:p-8 min-h-screen bg-gray-50/50 dark:bg-black text-foreground font-sans">
-      
-      {/* 1. TOP SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[450px]">
-        {/* Calendar */}
-        <Card className="col-span-1 p-0 rounded-3xl border-none shadow-sm bg-white dark:bg-neutral-900 flex flex-col overflow-hidden">
-          <div className="p-6 border-b border-gray-100 dark:border-neutral-800">
-             <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white">Calendar View</h3>
-          </div>
-          <div className="flex-1 flex  justify-center items-center bg-white dark:bg-neutral-900 p-6">
-             <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-xl border border-gray-100 dark:border-neutral-800 p-4 shadow-sm" />
+    <div className="flex h-screen flex-col bg-gray-50 dark:bg-black p-6 gap-6 overflow-y-auto">
+    
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 shrink-0">
+        
+        {/* 1. CALENDAR VIEW (Top Left) */}
+        <Card className="col-span-1 p-6 rounded-3xl border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm flex flex-col h-[420px]">
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white font-serif">Calendar View</h2>
+          <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-black/40 rounded-2xl border border-gray-100 dark:border-neutral-800">
+             <Calendar 
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                className="rounded-md border-0 scale-110 transform"
+             />
           </div>
         </Card>
-        {/* Details */}
-        <Card className="col-span-1 lg:col-span-2 p-0 rounded-3xl border-none shadow-sm bg-white dark:bg-neutral-900 flex flex-col relative overflow-hidden">
-          <div className="p-6 border-b border-gray-100 dark:border-neutral-800 z-10 bg-white dark:bg-neutral-900 flex justify-between items-center">
-             <h3 className="font-serif text-xl font-bold text-gray-900 dark:text-white">View Details</h3>
-             <span className="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 dark:bg-neutral-800 dark:border-neutral-700">{date ? date.toLocaleDateString() : 'Select a date'}</span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6 relative z-0"><AssignmentDetailsList assignments={sidePanelList} /></div>
+
+        <Card className="col-span-1 lg:col-span-2 p-6 rounded-3xl border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm flex flex-col h-[420px]">
+           <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white font-serif">View Details</h2>
+              <span className="text-sm font-medium px-3 py-1 rounded-full bg-gray-100 dark:bg-neutral-800 text-gray-500">
+                {date ? date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) : "Select a date"}
+              </span>
+           </div>
+           
+           <div className="flex-1 overflow-y-auto pr-2">
+             <AssignmentDetailsList 
+               assignments={sidePanelList} 
+               onClick={(item) => { setSelectedItem(item); toggleModal("view", true); }}
+             />
+           </div>
         </Card>
       </div>
 
-      {/* 2. MANAGEMENT TABLE */}
-      <Card className="rounded-3xl border-none shadow-sm bg-white dark:bg-neutral-900 p-6 lg:p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div><h3 className="font-serif text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Assignments & Activities Management</h3><p className="text-gray-500 mt-1">Manage your assignment and activities efficiently</p></div>
-          <Button onClick={openCreate} className="rounded-xl h-12 bg-white text-black hover:bg-gray-100 border border-gray-200 dark:border-neutral-700 dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-sm gap-2 px-6 font-medium transition-all hover:scale-[1.02]"><Plus className="h-5 w-5" /> Add Assignment</Button>
+      <Card className="flex-1 flex flex-col p-6 rounded-3xl border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm min-h-[400px]">
+        
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-serif">Assignments & Activities</h1>
+            <p className="text-gray-500 mt-1">View upcoming tasks and deadlines.</p>
+          </div>
+          <Button onClick={() => toggleModal("create", true)} className="rounded-xl bg-black dark:bg-white text-white dark:text-black hover:opacity-90">
+            <Plus className="mr-2 h-4 w-4" /> Create New
+          </Button>
         </div>
-        <div className="overflow-x-auto -mx-6 lg:mx-0 px-6 lg:px-0">
-          <table className="w-full text-left text-sm min-w-[1000px]">
-            <thead>
-              <tr className="text-gray-400 border-b border-dashed border-gray-200 dark:border-neutral-800">
-                {["Subject Name", "Type", "Date & Time Start", "Date & Time End", "Status", "Created By", "Actions"].map(h => (
-                    <th key={h} className={`pb-4 font-medium uppercase text-xs tracking-wider text-gray-500 ${h === 'Subject Name' ? 'pl-4' : ''} ${h === 'Actions' ? 'text-right pr-4' : ''}`}>{h}</th>
+
+        <div className="flex-1 overflow-x-auto">
+          {assignments.length === 0 ? (
+             <div className="flex h-full items-center justify-center text-gray-400">
+                No assignments found.
+             </div>
+          ) : (
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr className="text-gray-400 border-b border-gray-100 dark:border-neutral-800 text-xs font-bold uppercase tracking-wider">
+                  <th className="pb-4 pl-4 w-[30%]">Subject Name</th>
+                  <th className="pb-4 w-[10%]">Type</th>
+                  <th className="pb-4 w-[15%]">Date & Time Start</th>
+                  <th className="pb-4 w-[15%]">Date & Time End</th>
+                  <th className="pb-4 w-[10%]">Status</th>
+                  <th className="pb-4 w-[10%]">Created By</th>
+                  <th className="pb-4 text-right pr-4 w-[10%]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-neutral-800">
+                {assignments.map((item) => (
+                  <AssignmentRow 
+                    key={item.id} 
+                    item={item} 
+                    onClick={() => { setSelectedItem(item); toggleModal("view", true); }}
+                    onEdit={(e, item) => { e.stopPropagation(); setSelectedItem(item); toggleModal("create", true); }}
+                    onDelete={(e, item) => { e.stopPropagation(); setSelectedItem(item); toggleModal("delete", true); }}
+                    onPublish={(e, item) => { e.stopPropagation(); setSelectedItem(item); toggleModal("publish", true); }}
+                    onUnpublish={(e, item) => { e.stopPropagation(); setSelectedItem(item); toggleModal("unpublish", true); }}
+                  />
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50 dark:divide-neutral-800/50">
-              {assignments.map((item) => (
-                <AssignmentRow key={item.id} item={item} onClick={openView} onEdit={openEdit} onDelete={openDelete} onPublish={openPublish} onUnpublish={openUnpublish} />
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          )}
         </div>
       </Card>
 
-      {/* MODALS */}
       <CreateAssignmentModal isOpen={modals.create} onClose={() => toggleModal("create", false)} onSave={actions.handleSave} initialData={selectedItem} />
       <ViewAssignmentModal isOpen={modals.view} onClose={() => toggleModal("view", false)} data={selectedItem} />
-      <DeleteAssignmentModal isOpen={modals.delete} onClose={() => toggleModal("delete", false)} onConfirm={actions.handleDelete} title={selectedItem?.subject || "Assignment"} />
       
-      {/* NEW PUBLISH MODALS */}
-      <PublishAssignmentModal isOpen={modals.publish} onClose={() => toggleModal("publish", false)} onConfirm={confirmPublish} title={selectedItem?.subject || "Assignment"} />
-      <UnpublishAssignmentModal isOpen={modals.unpublish} onClose={() => toggleModal("unpublish", false)} onConfirm={confirmUnpublish} title={selectedItem?.subject || "Assignment"} />
+      {/* NOTE: Ensure that your AssignmentRow component is calling `onPublish` when status is Draft 
+         and `onUnpublish` when status is Published. This hook handles the rest.
+      */}
+      
+      <ConfirmationModal isOpen={modals.delete} onClose={() => toggleModal("delete", false)} onConfirm={actions.handleDelete} title="Delete Assignment?" variant="danger" confirmLabel="Yes, Delete" description={<>Are you sure you want to delete <strong>{selectedItem?.subject}</strong>?</>} />
+      <ConfirmationModal isOpen={modals.publish} onClose={() => toggleModal("publish", false)} onConfirm={actions.handleToggleStatus} title="Publish Assignment?" variant="success" confirmLabel="Publish Now" description={<>Students will see <strong>{selectedItem?.subject}</strong>.</>} />
+      <ConfirmationModal isOpen={modals.unpublish} onClose={() => toggleModal("unpublish", false)} onConfirm={actions.handleToggleStatus} title="Unpublish Assignment?" variant="warning" confirmLabel="Unpublish" description="This will hide the assignment." />
     </div>
   );
 }

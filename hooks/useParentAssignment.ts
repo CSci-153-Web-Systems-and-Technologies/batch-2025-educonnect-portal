@@ -1,14 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { Assignment, INITIAL_ASSIGNMENTS } from "@/data/assignmentData";
+import { useState, useEffect } from "react";
+import { assignmentService } from "@/services/assignmentService";
+import { Assignment } from "@/data/assignmentData";
 
 export function useParentAssignment() {
+    const [assignments, setAssignments] = useState<Assignment[]>([]);
+    const [loading, setLoading] = useState(true);
+    
+    // Date state for the calendar filter
     const [date, setDate] = useState<Date | undefined>(new Date());
-    const [assignments] = useState<Assignment[]>(INITIAL_ASSIGNMENTS.filter(a => a.status === "Published"));
-    const [modals, setModals] = useState({ view: false });
+    
+    // View Modal State
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Assignment | null>(null);
-    const toggleModal = (modal: keyof typeof modals, isOpen: boolean) => setModals(prev => ({ ...prev, [modal]: isOpen }));
+
+    // Initial Fetch
+    useEffect(() => {
+        const fetchAssignments = async () => {
+            setLoading(true);
+            try {
+                // Fetch ONLY published assignments from the database
+                const data = await assignmentService.getPublished();
+                setAssignments(data as any);
+            } catch (error) {
+                console.error("Error fetching assignments:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAssignments();
+    }, []);
+
+    // Filter Logic: Show assignments active on the selected date
     const sidePanelList = assignments.filter(a => {
         if (!date) return false;
         const check = new Date(date); check.setHours(0,0,0,0);
@@ -18,11 +42,25 @@ export function useParentAssignment() {
         return check >= start && check <= due;
     });
 
+    const openViewModal = (item: Assignment) => {
+        setSelectedItem(item);
+        setIsViewModalOpen(true);
+    };
+
+    const closeViewModal = () => {
+        setIsViewModalOpen(false);
+        setSelectedItem(null);
+    };
+
     return {
-        date, setDate,
         assignments, 
         sidePanelList,
-        modals, toggleModal,
-        selectedItem, setSelectedItem
+        date, 
+        setDate,
+        loading,
+        isViewModalOpen,
+        selectedItem,
+        openViewModal,
+        closeViewModal
     };
 }

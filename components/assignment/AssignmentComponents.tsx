@@ -44,7 +44,7 @@ export function AssignmentDetailsList({
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start">
               <h4 className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {item.subject}
+                  {(item as any).title || item.subject}
               </h4>
             </div>
             
@@ -91,7 +91,7 @@ export function AssignmentRow({ item, onClick, readOnly = false, onEdit, onDelet
     >
       <td className="py-5 pl-4">
         <div className="font-bold text-gray-900 dark:text-white group-hover:text-black dark:group-hover:text-white transition-colors">
-            {item.subject}
+            {(item as any).title || item.subject}
         </div>
         <div className="text-xs text-gray-400 mt-0.5 max-w-[200px] truncate group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
             {item.description}
@@ -122,7 +122,7 @@ export function AssignmentRow({ item, onClick, readOnly = false, onEdit, onDelet
       )}
       
       <td className="py-5 text-gray-500 text-sm font-medium group-hover:text-black dark:group-hover:text-white transition-colors">
-        {item.creator}
+        {(item as any).creatorName || item.creator}
       </td>
       
       {/* Actions: Hidden in Read-Only Mode */}

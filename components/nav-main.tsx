@@ -1,6 +1,7 @@
 "use client"
 
 import {type LucideIcon } from "lucide-react"
+import Link from "next/link" // <-- Ensure Link is imported
 
 import {
   Collapsible,
@@ -39,10 +40,16 @@ export function NavMain({
             className="group/collapsible"
           >
             <SidebarMenuItem>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>                  
-              </SidebarMenuButton>
+              {/* FIX: Removed passHref and legacyBehavior */}
+              <Link href={item.url}> 
+                <SidebarMenuButton 
+                  tooltip={item.title}
+                  isActive={item.isActive} 
+                >
+                  {item.icon && <item.icon />}
+                  <span>{item.title}</span>                  
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </Collapsible>
         ))}

@@ -17,9 +17,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-// Import Select components (assuming you have them, e.g., Select, SelectContent, etc.)
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; 
-import Link from 'next/link'; // Import Link if not already present
+import Link from 'next/link'; 
+import { X, Plus } from 'lucide-react';
+
+const GRADES = ["7", "8", "9", "10"];
+const SECTIONS = ["A", "B", "C"];
 
 export function SignupForm({
   className,
@@ -29,10 +32,40 @@ export function SignupForm({
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [fullName, setFullName] = React.useState('');
-  const [role, setRole] = React.useState<'teacher' | 'parent'>('teacher'); // New role state
+  const [role, setRole] = React.useState<'teacher' | 'parent'>('teacher');
+  
+  // --- NEW STATE FOR GRADES/SECTIONS ---
+  // For Parents (Single Child link for now)
+  const [childGrade, setChildGrade] = React.useState('');
+  const [childSection, setChildSection] = React.useState('');
+
+  // For Teachers (Multiple Advisory Classes)
+  const [advisoryClasses, setAdvisoryClasses] = React.useState<{ grade: string, section: string }[]>([]);
+  const [tempTeacherGrade, setTempTeacherGrade] = React.useState('');
+  const [tempTeacherSection, setTempTeacherSection] = React.useState('');
+
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [isSuccess, setIsSuccess] = React.useState(false);
+
+  // Helper to add advisory class for teachers
+  const addAdvisoryClass = () => {
+    if (!tempTeacherGrade || !tempTeacherSection) return;
+    
+    // Prevent duplicates
+    const exists = advisoryClasses.some(c => c.grade === tempTeacherGrade && c.section === tempTeacherSection);
+    if (!exists) {
+      setAdvisoryClasses([...advisoryClasses, { grade: tempTeacherGrade, section: tempTeacherSection }]);
+    }
+    // Reset selection
+    setTempTeacherGrade('');
+    setTempTeacherSection('');
+  };
+
+  // Helper to remove advisory class
+  const removeAdvisoryClass = (index: number) => {
+    setAdvisoryClasses(advisoryClasses.filter((_, i) => i !== index));
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +79,16 @@ export function SignupForm({
       return;
     }
 
-    // 1. Create the user in Supabase Auth (auth.users)
+    // Validation: Ensure grade/section selected based on role
+    if (role === 'parent' && (!childGrade || !childSection)) {
+      setMessage("Please select your child's Grade and Section.");
+      setLoading(false);
+      return;
+    }
+    // Optional: Enforce at least one advisory class for teachers? 
+    // if (role === 'teacher' && advisoryClasses.length === 0) { ... }
+
+    // 1. Create the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -58,7 +100,7 @@ export function SignupForm({
       return;
     }
 
-    // 2. Create profile via server-side API route (uses service role key to bypass RLS)
+    // 2. Create profile via API
     if (authData.user) {
         try {
           const res = await fetch('/api/auth/create-profile', {
@@ -67,7 +109,11 @@ export function SignupForm({
             body: JSON.stringify({
               userId: authData.user.id,
               role,
-              fullName
+              fullName,
+              // Pass the new data fields to the API
+              gradeDetails: role === 'parent' 
+                ? { grade: childGrade, section: childSection }
+                : { advisoryClasses: advisoryClasses } 
             })
           })
 
@@ -75,12 +121,12 @@ export function SignupForm({
             const err = await res.json()
             setMessage(`Signup successful, but failed to link profile: ${err.error}`)
           } else {
-            setMessage('Success! Check your email to confirm your account and complete registration.')
+            setMessage('Success! Check your email to confirm your account.')
             setIsSuccess(true)
           }
         } catch (err: any) {
           setMessage(`Signup successful, but profile creation failed: ${err.message}`)
-          setIsSuccess(true) // Auth succeeded, profile may be created manually later
+          setIsSuccess(true) 
         }
     }
     
@@ -102,7 +148,6 @@ export function SignupForm({
               
               <Field>
                 <FieldLabel htmlFor="role">Account Type</FieldLabel>
-                {/* Role selection using shadcn Select component */}
                 <Select value={role} onValueChange={(value: 'teacher' | 'parent') => setRole(value)}>
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select Account Type" />
@@ -113,6 +158,87 @@ export function SignupForm({
                     </SelectContent>
                 </Select>
               </Field>
+
+              {/* === PARENT: Child's Grade & Section === */}
+              {role === 'parent' && (
+                <div className="grid grid-cols-2 gap-4 p-4 border border-blue-100 dark:border-blue-900 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
+                  <Field>
+                    <FieldLabel className="text-blue-600 dark:text-blue-400">Child's Grade</FieldLabel>
+                    <Select value={childGrade} onValueChange={setChildGrade}>
+                      <SelectTrigger><SelectValue placeholder="Grade" /></SelectTrigger>
+                      <SelectContent>
+                        {GRADES.map(g => <SelectItem key={g} value={g}>Grade {g}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <FieldLabel className="text-blue-600 dark:text-blue-400">Section</FieldLabel>
+                    <Select value={childSection} onValueChange={setChildSection}>
+                      <SelectTrigger><SelectValue placeholder="Section" /></SelectTrigger>
+                      <SelectContent>
+                        {SECTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+              )}
+
+              {/* === TEACHER: Advisory Classes (Multiple) === */}
+              {role === 'teacher' && (
+                <div className="space-y-3 p-4 border border-orange-100 dark:border-orange-900 rounded-lg bg-orange-50/50 dark:bg-orange-900/10">
+                  <FieldLabel className="text-orange-600 dark:text-orange-400">Advisory Class(es)</FieldLabel>
+                  
+                  {/* Selection Row */}
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Select value={tempTeacherGrade} onValueChange={setTempTeacherGrade}>
+                        <SelectTrigger><SelectValue placeholder="Grade" /></SelectTrigger>
+                        <SelectContent>
+                          {GRADES.map(g => <SelectItem key={g} value={g}>Grade {g}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-24">
+                      <Select value={tempTeacherSection} onValueChange={setTempTeacherSection}>
+                        <SelectTrigger><SelectValue placeholder="Sec" /></SelectTrigger>
+                        <SelectContent>
+                          {SECTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button 
+                      type="button" 
+                      onClick={addAdvisoryClass}
+                      variant="secondary"
+                      className="shrink-0"
+                      disabled={!tempTeacherGrade || !tempTeacherSection}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* List of Added Classes */}
+                  {advisoryClasses.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {advisoryClasses.map((ac, idx) => (
+                        <div key={idx} className="flex items-center gap-1 px-3 py-1 rounded-full bg-white dark:bg-neutral-800 border shadow-sm text-sm">
+                          <span className="font-medium">Gr {ac.grade} - {ac.section}</span>
+                          <button 
+                            type="button" 
+                            onClick={() => removeAdvisoryClass(idx)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {advisoryClasses.length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">No advisory classes added yet.</p>
+                  )}
+                </div>
+              )}
 
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>

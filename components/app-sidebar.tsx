@@ -20,72 +20,68 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
+// 1. Import the Auth Hook
+import { useAuth } from "@/contexts/AuthContext";
 
-// This is sample data.
-const data = {
+// 2. Define the Menu Structure for TEACHERS
+const teacherNav = [
+  { title: "Dashboard", url: "/dashboard/teacher", icon: HomeIcon },
+  { title: "Assignments", url: "/assignment/teacher", icon: BookOpenIcon },
+  { title: "Attendance", url: "/attendance/teacher", icon: CheckCheckIcon },
+  { title: "Grades", url: "/grade/teacher", icon: GraduationCapIcon },
+  { title: "Events", url: "/calendar/teacher", icon: CalendarIcon },
+  { title: "Messages", url: "#", icon: MessageCircleIcon },
+];
 
-  teams: [
-    {
-      name: "EduConnect Portal",
-      logo: SchoolIcon,
-      plan: "Communication Portal",
-    }
-  ],
+// 3. Define the Menu Structure for PARENTS
+const parentNav = [
+  { title: "Dashboard", url: "/dashboard/parent", icon: HomeIcon },
+  { title: "Assignments", url: "/assignment/parent", icon: BookOpenIcon },
+  { title: "Attendance", url: "/attendance/parent", icon: CheckCheckIcon },
+  { title: "Grades", url: "/grade/parent", icon: GraduationCapIcon },
+  { title: "Events", url: "/calendar/parent", icon: CalendarIcon },
+  { title: "Messages", url: "#", icon: MessageCircleIcon },
+];
 
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: HomeIcon,
-      
-    },
-    {
-      title: "Messages",
-      url: "#",
-      icon: MessageCircleIcon,
-    },
-    {
-      title: "Grades",
-      url: "#",
-      icon: GraduationCapIcon,
-    },
-    {
-      title: "Attendance",
-      url: "#",
-      icon: CheckCheckIcon,
-    },
-    {
-      title: "Events",
-      url: "#",
-      icon: CalendarIcon,
-    },
-    {
-      title: "Assignments",
-      url: "#",
-      icon: BookOpenIcon,
-    },
-  ],
-
-  user: {
-    name: "Mr/Mrs Sinday",
-    avatar: "/public/images/Profile.jpg",
-  },
-  
-}
+const teams = [
+  {
+    name: "EduConnect Portal",
+    logo: SchoolIcon,
+    plan: "Communication Portal",
+  }
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // 4. Get the current user and role from the AuthContext
+  const { user, role } = useAuth();
+
+  // 5. Select the correct navigation items based on the role
+  const navItems = role === 'teacher' ? teacherNav : (role === 'parent' ? parentNav : []);
+
+  // 6. Construct the user object dynamically
+  // Note: We use 'user_metadata.full_name' if available, otherwise fallback to email part
+  const userData = {
+    name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User",
+    email: user?.email || "No Email",
+    avatar: "/images/Profile.jpg", // Static avatar for now
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <Separator orientation="horizontal" className="mr-2 data-[orientation=vertical]:h-4"/>
+      
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {/* 7. Pass the dynamic navItems to NavMain */}
+        <NavMain items={navItems} />
       </SidebarContent>
+      
       <Separator orientation="horizontal" className="mr-2 data-[orientation=vertical]:h-4"/>
+      
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
   )

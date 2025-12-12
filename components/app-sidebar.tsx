@@ -9,6 +9,7 @@ import {
   HomeIcon,
   MessageCircleIcon,
   SchoolIcon,
+  Loader2, // <-- Import Loader Icon
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator";
 import { NavMain } from "@/components/nav-main"
@@ -20,10 +21,9 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
-// 1. Import the Auth Hook
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext"; 
 
-// 2. Define the Menu Structure for TEACHERS
+// Define the Menu Structure for TEACHERS
 const teacherNav = [
   { title: "Dashboard", url: "/dashboard/teacher", icon: HomeIcon },
   { title: "Assignments", url: "/assignment/teacher", icon: BookOpenIcon },
@@ -33,7 +33,7 @@ const teacherNav = [
   { title: "Messages", url: "#", icon: MessageCircleIcon },
 ];
 
-// 3. Define the Menu Structure for PARENTS
+// Define the Menu Structure for PARENTS
 const parentNav = [
   { title: "Dashboard", url: "/dashboard/parent", icon: HomeIcon },
   { title: "Assignments", url: "/assignment/parent", icon: BookOpenIcon },
@@ -52,18 +52,17 @@ const teams = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // 4. Get the current user and role from the AuthContext
-  const { user, role } = useAuth();
+  // Get the current user, role, and loading state
+  const { user, role, isLoading } = useAuth(); 
 
-  // 5. Select the correct navigation items based on the role
+  // Select the correct navigation items based on the role
   const navItems = role === 'teacher' ? teacherNav : (role === 'parent' ? parentNav : []);
 
-  // 6. Construct the user object dynamically
-  // Note: We use 'user_metadata.full_name' if available, otherwise fallback to email part
+  // Construct the user object dynamically
   const userData = {
     name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User",
     email: user?.email || "No Email",
-    avatar: "/images/Profile.jpg", // Static avatar for now
+    avatar: "/images/Profile.jpg", 
   };
 
   return (
@@ -74,8 +73,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Separator orientation="horizontal" className="mr-2 data-[orientation=vertical]:h-4"/>
       
       <SidebarContent>
-        {/* 7. Pass the dynamic navItems to NavMain */}
-        <NavMain items={navItems} />
+        {/* CRITICAL FIX: Show a loading spinner if the role hasn't been determined yet */}
+        {isLoading ? (
+            <div className="flex justify-center items-center h-full pt-4">
+                <Loader2 className="animate-spin h-6 w-6 text-gray-500" />
+            </div>
+        ) : (
+            <NavMain items={navItems} />
+        )}
       </SidebarContent>
       
       <Separator orientation="horizontal" className="mr-2 data-[orientation=vertical]:h-4"/>

@@ -3,34 +3,45 @@
 import { useState, useEffect } from "react";
 import { assignmentService } from "@/services/assignmentService";
 import { Assignment } from "@/data/assignmentData";
+import { useAuth } from "@/contexts/AuthContext"; // <-- CRITICAL IMPORT
 
 export function useParentAssignment() {
     const [assignments, setAssignments] = useState<Assignment[]>([]);
     const [loading, setLoading] = useState(true);
     
-    // Date state for the calendar filter
     const [date, setDate] = useState<Date | undefined>(new Date());
-    
-    // View Modal State
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Assignment | null>(null);
 
-    // Initial Fetch
+    const { user, isLoading: authLoading } = useAuth(); // Get user and state
+
+    // Initial Fetch - Runs when the user object is ready
     useEffect(() => {
         const fetchAssignments = async () => {
+            // CRITICAL: Exit if user is not authenticated or still loading
+            if (authLoading || !user?.id) { 
+                setLoading(false); 
+                return; 
+            } 
+            
             setLoading(true);
             try {
-                // Fetch ONLY published assignments from the database
-                const data = await assignmentService.getPublished();
+                // Pass the PARENT ID to the service for filtering
+                const data = await assignmentService.getPublished(user.id);
                 setAssignments(data as any);
             } catch (error) {
-                console.error("Error fetching assignments:", error);
+                console.error("Error fetching published assignments for parent:", error);
+                setAssignments([]);
             } finally {
                 setLoading(false);
             }
         };
-        fetchAssignments();
-    }, []);
+        
+        // Fetch only when the auth state is stable
+        if (!authLoading) {
+             fetchAssignments();
+        }
+    }, [user, authLoading]); // Dependencies must include user and authLoading
 
     // Filter Logic: Show assignments active on the selected date
     const sidePanelList = assignments.filter(a => {

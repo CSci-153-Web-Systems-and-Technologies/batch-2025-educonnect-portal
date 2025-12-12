@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, FileText, User, Trash2, ChevronDownIcon, Globe, AlertTriangle, EyeOff } from "lucide-react";
+import { X, FileText, User, Trash2, ChevronDownIcon, Globe, AlertTriangle, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Assignment, AssignmentFormData } from "@/data/assignmentData";
+import { AssignmentFormData } from "@/data/assignmentData"; 
+import { assignmentService } from "@/services/assignmentService"; 
 
-// ... [Keep DateTimePicker component as is] ...
+// --- DATE TIME PICKER COMPONENT ---
 function DateTimePicker({ label, date, setDate }: { label: string, date: Date | undefined, setDate: (d: Date | undefined) => void }) {
   const [open, setOpen] = useState(false);
   const handleDateSelect = (selected: Date | undefined) => {
@@ -55,19 +56,56 @@ function DateTimePicker({ label, date, setDate }: { label: string, date: Date | 
   );
 }
 
+// --- CREATE/EDIT ASSIGNMENT MODAL (FIXED) ---
 export function CreateAssignmentModal({ isOpen, onClose, onSave, initialData }: any) {
-  const [formData, setFormData] = useState<AssignmentFormData>({ title: "", subject: "", type: "Assignment", startDate: "", dueDate: "", description: "" });
+  // FORM DATA must now include subjectId and classId
+  const [formData, setFormData] = useState<AssignmentFormData & { subjectId: string; classId: string }>({ 
+      title: "", 
+      subjectId: "",
+      classId: "", 
+      type: "Assignment", 
+      startDate: "", 
+      dueDate: "", 
+      description: "" 
+  });
   const [start, setStart] = useState<Date | undefined>();
   const [due, setDue] = useState<Date | undefined>();
+  const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
+  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]); 
+  const [loadingMetadata, setLoadingMetadata] = useState(true);
 
+  // Fetch subjects AND classes once on mount
+  useEffect(() => {
+    async function fetchMetadata() {
+      try {
+        const [subjectData, classData] = await Promise.all([
+          assignmentService.getSubjects(),
+          assignmentService.getClasses() 
+        ]);
+        setSubjects(subjectData as any);
+        setClasses(classData as any);
+      } catch (e) {
+        console.error("Failed to load subjects or classes:", e);
+      } finally {
+        setLoadingMetadata(false);
+      }
+    }
+    fetchMetadata();
+  }, []);
+
+  // Set initial data for editing
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        setFormData(initialData);
+        setFormData({ 
+            ...initialData, 
+            subjectId: initialData.subjectId || initialData.subjectId,
+            classId: initialData.classId || initialData.classId 
+        }); 
         setStart(new Date(initialData.startDate));
         setDue(new Date(initialData.dueDate));
       } else {
-        setFormData({ title: "", subject: "", type: "Assignment", startDate: "", dueDate: "", description: "" });
+        setFormData({ title: "", subjectId: "", classId: "", type: "Assignment", startDate: "", dueDate: "", description: "" });
         setStart(undefined);
         setDue(undefined);
       }
@@ -75,32 +113,126 @@ export function CreateAssignmentModal({ isOpen, onClose, onSave, initialData }: 
   }, [initialData, isOpen]);
 
   const handleSave = () => {
-    if (!formData.title || !start || !due) { alert("Please fill in required fields"); return; }
+    // Validate required fields including classId and subjectId
+    if (!formData.title || !formData.subjectId || !formData.classId || !start || !due) { 
+        alert("Please fill in Title, Subject, Class, Start Date, and Due Date."); 
+        return; 
+    }
     onSave({ ...formData, startDate: start.toISOString(), dueDate: due.toISOString() });
   };
 
   if (!isOpen) return null;
+  const isEditing = !!initialData;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
       <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 border border-gray-100 dark:border-neutral-800 ring-1 ring-white/10">
         <div className="flex justify-between items-start mb-8">
-          <div><h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">{initialData ? "Edit" : "Create New"} Assignment</h2><p className="text-gray-500 dark:text-gray-400 mt-1">Add a new assignment for the class.</p></div>
+          <div><h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">{isEditing ? "Edit" : "Create New"} Assignment</h2><p className="text-gray-500 dark:text-gray-400 mt-1">Add a new assignment for the class.</p></div>
           <button onClick={onClose}><X className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors" /></button>
         </div>
         <div className="space-y-6">
-          <div className="space-y-2"><Label className="text-gray-700 dark:text-gray-300 font-medium">Assignment Title</Label><Input type="text" className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 focus:ring-2 focus:ring-blue-500" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} /></div>
-          <div className="space-y-2"><Label className="text-gray-700 dark:text-gray-300 font-medium">Type</Label><Select value={formData.type} onValueChange={(val: any) => setFormData({...formData, type: val})}><SelectTrigger className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800"><SelectValue placeholder="Select Type" /></SelectTrigger><SelectContent>{["Assignment", "Activity", "Exam", "Report", "Oral Recitation", "Need to Study", "Project", "Quiz"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><DateTimePicker label="Start Date & Time" date={start} setDate={setStart} /><DateTimePicker label="Due Date & Time" date={due} setDate={setDue} /></div>
-          <div className="space-y-2"><Label className="text-gray-700 dark:text-gray-300 font-medium">Description</Label><Textarea className="rounded-xl min-h-[120px] bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 resize-none p-4" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+          
+          <div className="space-y-2">
+            <Label className="text-gray-700 dark:text-gray-300 font-medium">Assignment Title</Label>
+            <Input 
+                type="text" 
+                className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 focus:ring-2 focus:ring-blue-500" 
+                value={formData.title} 
+                onChange={e => setFormData({...formData, title: e.target.value})} 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* SUBJECT SELECT */}
+            <div className="space-y-2">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium">Subject</Label>
+                <Select 
+                    value={formData.subjectId} 
+                    onValueChange={(val: string) => setFormData({...formData, subjectId: val})}
+                    disabled={loadingMetadata}
+                >
+                    <SelectTrigger className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800">
+                        <SelectValue placeholder={loadingMetadata ? "Loading..." : "Select Subject"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {subjects.map(s => (
+                            <SelectItem key={s.id} value={s.id}>
+                                {s.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            
+            {/* CLASS SELECT (NEW FIELD) */}
+            <div className="space-y-2">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium">Class</Label>
+                <Select 
+                    value={formData.classId} 
+                    onValueChange={(val: string) => setFormData({...formData, classId: val})}
+                    disabled={loadingMetadata || isEditing} 
+                >
+                    <SelectTrigger className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800">
+                        <SelectValue placeholder={loadingMetadata ? "Loading..." : "Select Class"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {classes.map(c => (
+                            <SelectItem key={c.id} value={c.id}>
+                                {c.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            
+            {/* TYPE SELECT */}
+            <div className="space-y-2">
+                <Label className="text-gray-700 dark:text-gray-300 font-medium">Type</Label>
+                <Select 
+                    value={formData.type} 
+                    onValueChange={(val: any) => setFormData({...formData, type: val})}
+                >
+                    <SelectTrigger className="rounded-xl h-12 bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800">
+                        <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {["Assignment", "Activity", "Exam", "Report", "Oral Recitation", "Need to Study", "Project", "Quiz"].map(t => 
+                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                        )}
+                    </SelectContent>
+                </Select>
+            </div>
+            
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <DateTimePicker label="Start Date & Time" date={start} setDate={setStart} />
+            <DateTimePicker label="Due Date & Time" date={due} setDate={setDue} />
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-gray-700 dark:text-gray-300 font-medium">Description</Label>
+            <Textarea 
+                className="rounded-xl min-h-[120px] bg-gray-50 dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 resize-none p-4" 
+                value={formData.description} 
+                onChange={e => setFormData({...formData, description: e.target.value})} 
+            />
+          </div>
         </div>
-        <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100 dark:border-neutral-800"><Button variant="ghost" onClick={onClose} className="rounded-xl px-6 h-12 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800">Cancel</Button><Button onClick={handleSave} className="rounded-xl px-8 h-12 bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 font-medium shadow-lg">{initialData ? "Save Changes" : "Create Assignment"}</Button></div>
+        
+        <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100 dark:border-neutral-800">
+          <Button variant="ghost" onClick={onClose} className="rounded-xl px-6 h-12 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800">Cancel</Button>
+          <Button onClick={handleSave} className="rounded-xl px-8 h-12 bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 font-medium shadow-lg">{isEditing ? "Save Changes" : "Create Assignment"}</Button>
+        </div>
       </div>
     </div>
   );
 }
 
+// --- VIEW ASSIGNMENT MODAL (UPDATED to show Class Name) ---
 export function ViewAssignmentModal({ isOpen, onClose, data }: any) {
     if (!isOpen || !data) return null;
     return (
@@ -108,7 +240,14 @@ export function ViewAssignmentModal({ isOpen, onClose, data }: any) {
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
         <div className="relative z-10 w-full max-w-lg bg-white dark:bg-neutral-900 rounded-3xl p-8 shadow-2xl animate-in fade-in zoom-in-95 border border-gray-200 dark:border-neutral-800">
           <div className="flex justify-between items-start mb-6">
-             <div className="flex items-center gap-4"><div className="h-14 w-14 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center"><FileText className="h-7 w-7" /></div><div><h2 className="text-2xl font-serif font-bold text-gray-900 dark:text-white">{data.title || data.subject}</h2><p className="text-gray-600 dark:text-gray-400 font-medium">{data.type}</p></div></div>
+             <div className="flex items-center gap-4">
+                <div className="h-14 w-14 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center"><FileText className="h-7 w-7" /></div>
+                <div>
+                    <h2 className="text-2xl font-serif font-bold text-gray-900 dark:text-white">{data.title}</h2>
+                    {/* DISPLAY SUBJECT NAME AND CLASS NAME */}
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">{data.type} | {data.subjectName} | <span className="font-bold text-gray-800 dark:text-gray-200">{data.className}</span></p> 
+                </div>
+             </div>
              <button onClick={onClose}><X className="h-6 w-6 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" /></button>
           </div>
           <div className="space-y-6">
@@ -127,6 +266,7 @@ export function ViewAssignmentModal({ isOpen, onClose, data }: any) {
     );
 }
 
+// --- DELETE ASSIGNMENT MODAL ---
 export function DeleteAssignmentModal({ isOpen, onClose, onConfirm, title }: any) {
     if (!isOpen) return null;
     return (
@@ -144,7 +284,7 @@ export function DeleteAssignmentModal({ isOpen, onClose, onConfirm, title }: any
     );
 }
 
-// PUBLISH ASSIGNMENT MODAL
+// --- PUBLISH ASSIGNMENT MODAL ---
 interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -182,7 +322,7 @@ export function PublishAssignmentModal({ isOpen, onClose, onConfirm, title }: Pu
   );
 }
 
-// UNPUBLISH ASSIGNMENT MODAL
+// --- UNPUBLISH ASSIGNMENT MODAL ---
 interface UnpublishModalProps {
   isOpen: boolean;
   onClose: () => void;

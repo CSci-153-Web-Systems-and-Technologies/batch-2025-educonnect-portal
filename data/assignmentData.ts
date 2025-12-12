@@ -1,28 +1,21 @@
 export type Assignment = {
   id: string;
   title: string;
-  subject: string;
-  type: "Assignment" | "Activity" | "Group Project" | "Quiz";
+  // Use subjectId (UUID) instead of plain 'subject'
+  subjectId: string;
+  // NEW: Add Class ID (UUID)
+  classId: string;
+  type: "Assignment" | "Activity" | "Group Project" | "Quiz" | "Report" | "Oral Recitation" | "Need to Study" | "Project";
   startDate: string;
   dueDate: string;
   status: "Draft" | "Published";
   creator: string;
   description: string;
+  subjectName?: string; 
+  className?: string; // For display purposes
 };
 
-export type AssignmentFormData = Omit<Assignment, "id" | "status" | "creator">;
+// Update AssignmentFormData to include subjectId and classId
+export type AssignmentFormData = Omit<Assignment, "id" | "status" | "creator" | "subjectName" | "className">;
 
-export const INITIAL_ASSIGNMENTS: Assignment[] = [
-  { 
-    id: "1", subject: "Mathematics", type: "Assignment", 
-    startDate: new Date(new Date().setHours(9,0)).toISOString(), 
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), 
-    status: "Draft", creator: "Mr. Thompson", description: "Solve the algebraic expressions in Chapter 4."
-  },
-  { 
-    id: "2", subject: "Science", type: "Activity", 
-    startDate: new Date(new Date().setHours(10,0)).toISOString(), 
-    dueDate: new Date(new Date().setHours(17,0)).toISOString(), 
-    status: "Published", creator: "Ms. Frizzle", description: "Lab report on photosynthesis."
-  },
-];
+// NOTE: You can remove INITIAL_ASSIGNMENTS if you are no longer using mock data.

@@ -6,6 +6,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { RoleGuard } from "@/components/RoleGuard";
 
 // --- Imports ---
 import { useTeacherCalendar } from "@/hooks/useTeacherCalendar";
@@ -29,6 +30,7 @@ export default function TeacherCalendarPage() {
   const openUnpublish = (e: any) => { setSelectedEvent(e); toggleModal("unpublish", true); };
 
   return (
+    <RoleGuard allowedRole="teacher">
     <div className="flex flex-col gap-8 p-8 min-h-screen bg-gray-50/50 dark:bg-black text-foreground font-sans">
       
       {/* 1. STATS */}
@@ -110,5 +112,6 @@ export default function TeacherCalendarPage() {
       <PublishEventModal isOpen={modals.publish} onClose={() => toggleModal("publish", false)} onConfirm={actions.handlePublish} eventTitle={selectedEvent?.title || "Event"} />
       <UnpublishEventModal isOpen={modals.unpublish} onClose={() => toggleModal("unpublish", false)} onConfirm={actions.handleUnpublish} eventTitle={selectedEvent?.title || "Event"} />
     </div>
+    </RoleGuard>
   );
 }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar"; 
 import { Card } from "@/components/ui/card";
 import { Plus, Loader2 } from "lucide-react";
+import { RoleGuard } from "@/components/RoleGuard";
 
 export default function AssignmentTeacherPage() {
   const { 
@@ -25,13 +26,16 @@ export default function AssignmentTeacherPage() {
 
   if (loading && assignments.length === 0) {
     return (
+      <RoleGuard allowedRole="teacher">
       <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
+      </RoleGuard>
     );
   }
 
   return (
+    <RoleGuard allowedRole="teacher">
     <div className="flex h-full flex-col bg-gray-50 dark:bg-black p-6 gap-6 overflow-hidden">
     
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 shrink-0">
@@ -125,5 +129,6 @@ export default function AssignmentTeacherPage() {
       <ConfirmationModal isOpen={modals.publish} onClose={() => toggleModal("publish", false)} onConfirm={actions.handleToggleStatus} title="Publish Assignment?" variant="success" confirmLabel="Publish Now" description={<>Students will see <strong>{selectedItem?.subject}</strong>.</>} />
       <ConfirmationModal isOpen={modals.unpublish} onClose={() => toggleModal("unpublish", false)} onConfirm={actions.handleToggleStatus} title="Unpublish Assignment?" variant="warning" confirmLabel="Unpublish" description="This will hide the assignment." />
     </div>
+    </RoleGuard>
   );
 }

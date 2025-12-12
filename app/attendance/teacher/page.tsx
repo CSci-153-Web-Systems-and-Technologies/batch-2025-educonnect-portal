@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { CalendarIcon, Users, Funnel } from "lucide-react";
+import { RoleGuard } from "@/components/RoleGuard";
 
 // 1. Import Generic Components
 import { FilterBar, FilterItem } from "@/components/dashboard/FilterBar";
@@ -95,6 +96,7 @@ export default function TeacherAttendancePage() {
   };
 
   return (
+    <RoleGuard allowedRole="teacher">
     <div className="flex flex-col gap-6 p-4 text-foreground">
       <FilterBar filters={filters} />
       
@@ -133,5 +135,6 @@ export default function TeacherAttendancePage() {
         onBulkUpdate={handleBulkUpdate}
       />
     </div>
+    </RoleGuard>
   );
 }

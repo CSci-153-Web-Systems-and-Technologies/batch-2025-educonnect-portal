@@ -6,11 +6,13 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { RoleGuard } from "@/components/RoleGuard";
 
 export default function ParentDashboard() {
   const router = useRouter();
 
   return (
+    <RoleGuard allowedRole="parent">
     <div className="flex flex-1 flex-col gap-6 p-6 pt-2">
       
       {/* SUMMARY CARDS */}
@@ -170,5 +172,6 @@ export default function ParentDashboard() {
 
       </div>
     </div>
+    </RoleGuard>
   );
 }

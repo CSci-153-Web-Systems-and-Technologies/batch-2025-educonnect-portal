@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import { Users, Award, MessageSquare, Calendar, Trophy, Medal, GraduationCap } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { RoleGuard } from "@/components/RoleGuard";
 
 export default function TeacherDashboard() {
   const router = useRouter();
 
   return (
+    <RoleGuard allowedRole="teacher">
     <div className="flex flex-1 flex-col gap-6 p-6 pt-2">
       
       {/* SUMMARY CARDS */}
@@ -95,5 +97,6 @@ export default function TeacherDashboard() {
         </DashboardSection>
       </div>
     </div>
+    </RoleGuard>
   );
 }

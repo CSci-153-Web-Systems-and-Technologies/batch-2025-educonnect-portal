@@ -18,6 +18,10 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/contexts/AuthContext"
@@ -72,11 +76,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Separator orientation="horizontal" className="mr-2 data-[orientation=vertical]:h-4"/>
       <SidebarContent>
         {isLoading ? (
-          <div className="space-y-2 p-2">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <SidebarMenuSkeleton key={index} showIcon />
-            ))}
-          </div>
+          <SidebarGroup>
+            <SidebarGroupLabel>NAVIGATION</SidebarGroupLabel>
+            <SidebarMenu>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuSkeleton showIcon />
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
         ) : (
           <NavMain items={navItems} />
         )}

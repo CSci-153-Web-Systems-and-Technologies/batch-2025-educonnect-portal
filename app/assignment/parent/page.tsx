@@ -6,6 +6,7 @@ import { ViewAssignmentModal } from "@/components/assignment/AssignmentModals"; 
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar"; 
 import { Loader2 } from "lucide-react";
+import { RoleGuard } from "@/components/RoleGuard";
 
 export default function AssignmentParentPage() {
   const { 
@@ -22,13 +23,16 @@ export default function AssignmentParentPage() {
 
   if (loading) {
     return (
+      <RoleGuard allowedRole="parent">
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
+      </RoleGuard>
     );
   }
 
   return (
+    <RoleGuard allowedRole="parent">
     <div className="flex h-full flex-col bg-gray-50 dark:bg-black p-6 gap-6 overflow-hidden">
       
       {/* --- TOP ROW: CALENDAR & DETAILS --- */}
@@ -112,5 +116,6 @@ export default function AssignmentParentPage() {
       />
       
     </div>
+    </RoleGuard>
   );
 }

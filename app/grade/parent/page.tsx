@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { PieChart, ScrollText, Award, Trophy } from "lucide-react";
+import { RoleGuard } from "@/components/RoleGuard";
 
 // Generic Components
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -74,6 +75,7 @@ export default function ParentGradePage() {
   }, [grades]);
 
   return (
+    <RoleGuard allowedRole="parent">
     <div className="flex flex-1 flex-col gap-6 p-6 pt-2 text-foreground">
       
       {/* 1. TOP SUMMARY CARDS */}
@@ -155,5 +157,6 @@ export default function ParentGradePage() {
           </div>
       </DashboardSection>
     </div>
+    </RoleGuard>
   );
 }

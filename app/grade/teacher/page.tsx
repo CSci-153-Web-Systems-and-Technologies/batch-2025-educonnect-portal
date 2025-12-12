@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilterBar, FilterItem } from "@/components/dashboard/FilterBar";
 import { ActionStatsBar, StatItem } from "@/components/dashboard/ActionStatsBar";
+import { RoleGuard } from "@/components/RoleGuard";
 
 // New Modal & Types
 import { GradebookModal, StudentFullData, SubjectScore } from "@/components/dashboard/GradebookModal"; 
@@ -150,10 +151,15 @@ export default function TeacherGradePage() {
   };
   
   if (studentsData.length === 0) {
-    return <div className="p-10 text-center">Loading...</div>;
+    return (
+      <RoleGuard allowedRole="teacher">
+        <div className="p-10 text-center">Loading...</div>
+      </RoleGuard>
+    );
   }
 
   return (
+    <RoleGuard allowedRole="teacher">
     <div className="flex flex-col gap-6 p-4 text-foreground">
       <FilterBar filters={filters} />
       
@@ -218,5 +224,6 @@ export default function TeacherGradePage() {
         />
       )}
     </div>
+    </RoleGuard>
   );
 }

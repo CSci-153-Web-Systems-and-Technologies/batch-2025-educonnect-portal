@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, Slash, Clock, ChevronDown } from "lucide-react";
+import { RoleGuard } from "@/components/RoleGuard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +90,7 @@ export default function AttendanceParentPage() {
   };
 
   return (
+    <RoleGuard allowedRole="parent">
     <div className="flex flex-1 flex-col gap-6 p-6 pt-2">
       {/* STAT CARDS */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -170,5 +172,6 @@ export default function AttendanceParentPage() {
         </DashboardSection>
       </div>
     </div>
+    </RoleGuard>
   );
 }

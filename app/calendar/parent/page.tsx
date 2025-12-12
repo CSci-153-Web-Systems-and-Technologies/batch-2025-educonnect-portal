@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { DayDetailsList, EventRow } from "@/components/calendar/CalendarComponents";
 import { useParentCalendar } from "@/hooks/useParentCalendar";
+import { RoleGuard } from "@/components/RoleGuard";
 
 export default function ParentCalendarPage() {
     const { 
@@ -16,6 +17,7 @@ export default function ParentCalendarPage() {
     } = useParentCalendar();
 
     return (
+        <RoleGuard allowedRole="parent">
         <div className="flex flex-col gap-8 p-6 lg:p-8 min-h-screen bg-gray-50/50 dark:bg-black text-foreground font-sans">
         
         {/* 1. STATS */}
@@ -82,5 +84,6 @@ export default function ParentCalendarPage() {
             </div>
         </Card>
         </div>
+        </RoleGuard>
     );
 }

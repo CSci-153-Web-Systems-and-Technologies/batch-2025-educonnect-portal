@@ -1,25 +1,33 @@
-// Example: app/api/assignments/route.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import { assignmentService } from "@/services/assignmentService";
 
-import { NextResponse } from 'next/server';
-// Import your Supabase client and service logic here
-import { assignmentService } from "@/services/assignmentService"; 
-
-export async function GET(request: Request) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        // Assume assignmentService.fetch() is defined to get all assignments from Supabase
-        const assignments = await assignmentService.fetchAssignments(); 
-        
-        return NextResponse.json(assignments, { status: 200 });
+        if (req.method === "GET") {
+            const scope = typeof req.query.scope === "string" ? req.query.scope : undefined;
+            const data = scope === "teacher"
+                ? await assignmentService.getAll()
+                : await assignmentService.getPublished();
+            res.status(200).json(data ?? []);
+            return;
+        }
+
+        if (req.method === "POST") {
+            const created = await assignmentService.create(req.body);
+            res.status(201).json(created);
+            return;
+        }
+
+        res.setHeader("Allow", ["GET", "POST"]);
+        res.status(405).json({ error: "Method Not Allowed" });
     } catch (error) {
-        console.error('API Error fetching assignments:', error);
-        return NextResponse.json(
-            { error: 'Failed to retrieve assignments' }, 
-            { status: 500 }
-        );
+        console.error("API Error (pages) assignments:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 }
 
-// You will also need a POST function for saving assignments (handleSave)
-export async function POST(request: Request) {
-    // ... (logic for handling the assignment creation data)
-}
+export const config = {
+    api: {
+        bodyParser: true,
+    },
+};

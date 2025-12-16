@@ -14,13 +14,13 @@ export type AssignmentFormData = Omit<Assignment, "id" | "status" | "creator">;
 
 export const INITIAL_ASSIGNMENTS: Assignment[] = [
   { 
-    id: "1", subject: "Mathematics", type: "Assignment", 
+    id: "1", title: "Algebra Practice", subject: "Mathematics", type: "Assignment", 
     startDate: new Date(new Date().setHours(9,0)).toISOString(), 
     dueDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), 
     status: "Draft", creator: "Mr. Thompson", description: "Solve the algebraic expressions in Chapter 4."
   },
   { 
-    id: "2", subject: "Science", type: "Activity", 
+    id: "2", title: "Photosynthesis Lab Report", subject: "Science", type: "Activity", 
     startDate: new Date(new Date().setHours(10,0)).toISOString(), 
     dueDate: new Date(new Date().setHours(17,0)).toISOString(), 
     status: "Published", creator: "Ms. Frizzle", description: "Lab report on photosynthesis."

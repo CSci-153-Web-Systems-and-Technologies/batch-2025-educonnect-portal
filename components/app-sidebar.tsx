@@ -65,6 +65,8 @@ const user = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { role, isLoading } = useAuth()
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
 
   const navItems = React.useMemo(() => navItemsByRole[role] ?? navItemsByRole.public, [role])
 
@@ -75,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <Separator orientation="horizontal" className="mr-2 data-[orientation=vertical]:h-4"/>
       <SidebarContent>
-        {isLoading ? (
+        {(!mounted || isLoading) ? (
           <SidebarGroup>
             <SidebarGroupLabel>NAVIGATION</SidebarGroupLabel>
             <SidebarMenu>

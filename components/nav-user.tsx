@@ -39,7 +39,7 @@ export function NavUser({
 }) {
   const router = useRouter()
   const { isMobile } = useSidebar()
-  const avatar = "images/Profile.jpg";
+  const avatar = "/images/Profile.jpg";
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

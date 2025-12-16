@@ -5,11 +5,8 @@ import "./globals.css";
 // 1. Import the AuthProvider
 import { AuthProvider } from "@/contexts/AuthContext"; 
 
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { Separator } from "@/components/ui/separator";
-import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import AppChrome from "@/components/AppChrome";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -38,33 +35,15 @@ export default function RootLayout({
             >
                 {/* 2. Place AuthProvider here to wrap the entire main application structure */}
                 <AuthProvider>
-                    <SidebarProvider>
-                        <AppSidebar />
-
-                        <ThemeProvider
-                            attribute="class"
-                            defaultTheme="system"
-                            enableSystem
-                            disableTransitionOnChange
-                        >
-                            <SidebarInset>
-                                <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-                                    <div className="flex items-center gap-2 px-4">
-                                        <SidebarTrigger className="-ml-1" />
-                                        <Separator
-                                            orientation="vertical"
-                                            className="mr-2 data-[orientation=vertical]:h-4"
-                                        />
-                                        
-                                        <Navbar/>
-                                    
-                                    </div>
-                                </header>
-                                {/* {children} is the page content (e.g., /assignments, /login, /dashboard) */}
-                                {children} 
-                            </SidebarInset>
-                        </ThemeProvider>
-                    </SidebarProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        {/* AppChrome hides chrome on /login and /signup */}
+                        <AppChrome>{children}</AppChrome>
+                    </ThemeProvider>
                 </AuthProvider>
             </body>
         </html>

@@ -54,9 +54,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Teacher Portal Login</CardTitle> 
+          <CardTitle className="text-xl">EduConnect Portal</CardTitle> 
           <CardDescription>
-            Enter your email and password to manage assignments.
+            Please log in to access your EduConnect Portal Account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,7 +74,7 @@ export function LoginForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="teacher/parent@gmail.com"
                   value={email} // Controlled input
                   onChange={(e) => setEmail(e.target.value)}
                   required

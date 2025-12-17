@@ -93,7 +93,7 @@ export function SignupForm({
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Create Account</CardTitle>
           <CardDescription>
-            Enter your details below to create your EduConnectPortal account.
+            Enter your details below to create your EduConnect Portal account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,7 +119,7 @@ export function SignupForm({
                 <Input 
                   id="name" 
                   type="text" 
-                  placeholder="John Doe" 
+                  placeholder="Juan Dela Cruz" 
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required 
@@ -130,7 +130,7 @@ export function SignupForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="user@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
